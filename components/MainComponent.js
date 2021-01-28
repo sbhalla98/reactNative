@@ -27,6 +27,8 @@ import { baseUrl } from '../shared/baseUrl';
 import { connect } from 'react-redux';
 import { fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
 
+import Reservation from './ReservationComponent';
+
 const mapStateToProps = state => {
   return {
     dishes: state.dishes,
@@ -119,6 +121,7 @@ class Main extends Component {
                 <Drawer.Screen name="About Us" component={AboutUs} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="info-circle" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 <Drawer.Screen name="Menu" component={MenuNavigator} options={{headerShown:false,drawerIcon:({headerTintColor})=>(<Icon size={24} name="list" color={headerTintColor}  type='font-awesome'></Icon>)}} />
                 <Drawer.Screen name="Contact Us" component={ContactUs} options={{drawerIcon:({headerTintColor})=>(<Icon size={22} name="address-card" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
+                <Drawer.Screen name="Reserve Table" component={Reservation} options={{drawerIcon:({headerTintColor})=>(<Icon size={22} name="cutlery" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 </Drawer.Navigator>
         </NavigationContainer>
         </View>
