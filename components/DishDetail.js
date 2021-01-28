@@ -8,13 +8,19 @@ import {Icon} from 'react-native-elements';
 import axios from "axios";
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
+import { postFavorite } from '../redux/ActionCreators';
 
 const mapStateToProps = state => {
     return {
       dishes: state.dishes,
-      comments: state.comments
+      comments: state.comments,
+      favorites: state.favorites
     }
   }
+
+  const mapDispatchToProps = dispatch => ({
+    postFavorite: (dishId) => dispatch(postFavorite(dishId))
+})
 
 function RenderComments(props) {
 
@@ -82,44 +88,7 @@ class Dishdetail extends React.Component{
         };
     }
     markFavorite(dishId) {
-        this.setState({favorites: this.state.favorites.concat(dishId)});
-        console.log('here1')
-//         var xmlhttp;
-//   if (window.XMLHttpRequest) {
-//     xmlhttp = new XMLHttpRequest();
-//   } else {
-//     // code for older browsers
-//     xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-//   }
-//   xmlhttp.onreadystatechange = function() {
-//     if (this.readyState == 4 && this.status == 200) {
-//       console.log(this.responseText);
-//     }
-//   };
-//   xmlhttp.open("GET", 'https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b', true);
-//   xmlhttp.send();
-console.log('here')
-fetch('https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b')
-.then(response => {
-    console.log(response)
-    if (response.ok) {
-      return response;
-    } else {
-      var error = new Error('Error ' + response.status + ': ' + response.statusText);
-      error.response = response;
-      throw error;
-    }
-  },
-  error => {
-        var errmess = new Error(error.message);
-        throw errmess;
-  })
-.then(response => response.json()).then(data=>console.log(data))
-
-//   axios.get('https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b').then(response => response.data)
-//     .then((data) => {
-//       console.log(data)
-//      })
+        this.props.postFavorite(dishId);
     }
     static navigationOptions = {
         title: 'Dish Details'
@@ -130,7 +99,7 @@ fetch('https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b')
         const {dishId} = this.props.route.params;
         return(
             <>
-        <RenderDish dish={this.props.dishes.dishes[+dishId]} favorite={this.state.favorites.some(el => el === dishId)}
+        <RenderDish dish={this.props.dishes.dishes[+dishId]} favorite={this.props.favorites.some(el => el === dishId)}
                     onPress={() => this.markFavorite(dishId)} />
         <RenderComments comments={this.props.comments.comments.filter((comment) => comment.dishId === dishId)} />
         </>
@@ -139,4 +108,4 @@ fetch('https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b')
 }
 
 //export default Dishdetail;
-export default connect(mapStateToProps)(Dishdetail);
+export default connect(mapStateToProps,mapDispatchToProps)(Dishdetail);
