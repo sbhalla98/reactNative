@@ -28,6 +28,7 @@ import { connect } from 'react-redux';
 import { fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
 
 import Reservation from './ReservationComponent';
+import Favorite from './FavoriteComponent';
 
 const mapStateToProps = state => {
   return {
@@ -63,7 +64,7 @@ class MenuNavigator extends Component{
         
     render(){
     return(
-    <NavigationContainer initialRouteName="Menu" independent>
+    <NavigationContainer initialRouteName="Menu" independent >
     <Stack.Navigator screenOptions={{headerTintColor:'#fff',headerStyle:{backgroundColor:'#512DA8'}}}>
       <Stack.Screen name="Menu" options={{headerShown:true,headerLeft:()=>(<Icon size={18} name="menu" color="white" style={{marginLeft:10}} onPress={()=>{this.props.navigation.toggleDrawer()}}></Icon>)}}>{props => <Menu {...props} dishes={this.state.dishes} onPress={(dishId) => this.onDishSelect(dishId)}></Menu>}</Stack.Screen>
       <Stack.Screen name="DishDetail">{props =>  <Dishdetail {...props} dish={this.state.dishes.filter((dish) => dish.id === this.state.selectedDish)[0]} />}</Stack.Screen>
@@ -119,6 +120,7 @@ class Main extends Component {
                 <Drawer.Screen name="Home" component={Home} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="home" color={headerTintColor}  type='font-awesome'></Icon>)}} />
                 <Drawer.Screen name="About Us" component={AboutUs} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="info-circle" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 <Drawer.Screen name="Menu" component={MenuNavigator} options={{headerShown:false,drawerIcon:({headerTintColor})=>(<Icon size={24} name="list" color={headerTintColor}  type='font-awesome'></Icon>)}} />
+                <Drawer.Screen name="Fovorites" component={Favorite} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="heart" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 <Drawer.Screen name="Contact Us" component={ContactUs} options={{drawerIcon:({headerTintColor})=>(<Icon size={22} name="address-card" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 <Drawer.Screen name="Reserve Table" component={Reservation} options={{drawerIcon:({headerTintColor})=>(<Icon size={22} name="cutlery" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 </Drawer.Navigator>

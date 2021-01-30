@@ -39,12 +39,12 @@ class Menu extends React.Component{
     };
 
     render(){
-        if (this.props.dishes.dishes.isLoading) {
+        if (this.props.dishes.isLoading) {
             return(
                 <Loading />
             );
         }
-        else if (this.props.dishes.dishes.errMess) {
+        else if (this.props.dishes.errMess) {
             return(
                 <View>            
                     <Text>{props.dishes.errMess}</Text>

@@ -7,6 +7,8 @@ import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import { Loading } from './LoadingComponent';
 
+import * as Animatable from 'react-native-animatable';
+
 const mapStateToProps = state => {
     return {
       leaders: state.leaders
@@ -42,7 +44,7 @@ class About extends React.Component{
         return (
                 <ListItem
                     key={index}
-                    onPress={() => this.props.navigation.navigate('DishDetail', { dishId: item.id })}
+                    onPress={() => navigate('Menu', { screen:'DishDetail',params :{ dishId: item.id }})}
                   >
                        <Avatar source={require('./images/logo.png')} rounded />
                         <ListItem.Content>
@@ -67,6 +69,7 @@ class About extends React.Component{
         }
         else if (this.props.leaders.errMess) {
             return(
+                <Animatable.View animation="fadeInDown" duration={1000} delay={1000} >
                 <ScrollView>
                     <History />
                     <Card
@@ -74,11 +77,13 @@ class About extends React.Component{
                         <Text>{this.props.leaders.errMess}</Text>
                     </Card>
                 </ScrollView>
+                </Animatable.View>
             );
         }else{
 
             return (
             <>
+            <Animatable.View animation="fadeInDown" duration={2000} delay={1000} >
             <ScrollView>
             <History />
             <Card featuredTitle={'Our History'}>
@@ -92,6 +97,7 @@ class About extends React.Component{
                 />
             </Card>
             </ScrollView>
+            </Animatable.View>
             </>
             );
         }
