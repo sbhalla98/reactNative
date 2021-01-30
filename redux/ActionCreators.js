@@ -1,5 +1,6 @@
 import * as ActionTypes from './ActionTypes';
 import { baseUrl } from '../shared/baseUrl';
+import { add } from 'react-native-reanimated';
 
 export const fetchComments = () => (dispatch) => {
     return fetch('https://run.mocky.io/v3/f5e03405-3b6b-4e8b-aebe-fefc4cb9c801')
@@ -145,13 +146,27 @@ export const addLeaders = (leaders) => ({
 });
 
 export const postFavorite = (dishId)  => (dispatch) => {
-    // setTimeout(() => {
+    setTimeout(() => {
         dispatch(addFavorite(dishId));
-    // }, 2000);
+    }, 2000);
 };
 
 
 export const addFavorite = (dishId) => ({
     type: ActionTypes.ADD_FAVORITE,
     payload: dishId
+});
+
+export const postComment = (id,dishId,comment,author,rating,date)  => (dispatch) => {
+    setTimeout(() => {
+        dispatch(addComment(id,dishId,comment,author,rating,date));
+    }, 2000);
+};
+
+
+export const addComment = (id,dishId,comment,author,rating,date) => ({
+    type: ActionTypes.ADD_COMMENT,
+    payload: {
+        id,dishId,comment,author,rating,date
+    }
 });

@@ -66,7 +66,7 @@ class MenuNavigator extends Component{
     return(
     <NavigationContainer initialRouteName="Menu" independent>
     <Stack.Navigator screenOptions={{headerTintColor:'#fff',headerStyle:{backgroundColor:'#512DA8'}}}>
-      <Stack.Screen name="Menu" options={{headerShown:true,headerLeft:()=>(<Icon size={18} name="list" color="white" style={{marginLeft:10}} type='font-awesome' onPress={()=>{this.props.navigation.toggleDrawer()}}></Icon>)}}>{props => <Menu {...props} dishes={this.state.dishes} onPress={(dishId) => this.onDishSelect(dishId)}></Menu>}</Stack.Screen>
+      <Stack.Screen name="Menu" options={{headerShown:true,headerLeft:()=>(<Icon size={18} name="menu" color="white" style={{marginLeft:10}} onPress={()=>{this.props.navigation.toggleDrawer()}}></Icon>)}}>{props => <Menu {...props} dishes={this.state.dishes} onPress={(dishId) => this.onDishSelect(dishId)}></Menu>}</Stack.Screen>
       <Stack.Screen name="DishDetail">{props =>  <Dishdetail {...props} dish={this.state.dishes.filter((dish) => dish.id === this.state.selectedDish)[0]} />}</Stack.Screen>
     </Stack.Navigator>
   </NavigationContainer>
