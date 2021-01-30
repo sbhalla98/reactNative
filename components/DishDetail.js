@@ -8,7 +8,7 @@ import {Icon,Input,Button} from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import { postFavorite , postComment} from '../redux/ActionCreators';
-import { Rating, AirbnbRating } from 'react-native-elements';
+import { Rating } from 'react-native-elements';
 
 const mapStateToProps = state => {
     return {
@@ -53,7 +53,6 @@ function RenderComments(props) {
 }
 
 function RenderDish(props) {
-
     const dish = props.dish;
     const recognizeDrag = ({ moveX, moveY, dx, dy }) => {
         if ( dx < -200 )
@@ -61,15 +60,24 @@ function RenderDish(props) {
         else
             return false;
     }
-    handleViewRef = ref => this.view = ref;
+    const recognizeComment = ({ moveX, moveY, dx, dy }) => {
+        if ( dx > 200 )
+            return true;
+        else
+            return false;
+    }
+    let view = undefined;
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: (e, gestureState) => {
             return true;
         },
-        onPanResponderGrant: () => {this.view.rubberBand(1000).then(endState => console.log(endState.finished ? 'finished' : 'cancelled'));},
+        onPanResponderGrant: () => {
+            if(view){
+            view.rubberBand(1000).then(endState => console.log(endState.finished ? 'finished' : 'cancelled'));
+            }
+        },
         onPanResponderEnd: (e, gestureState) => {
-            console.log("pan responder end", gestureState);
-            if (recognizeDrag(gestureState))
+            if (recognizeDrag(gestureState)){
                 Alert.alert(
                     'Add Favorite',
                     'Are you sure you wish to add ' + dish.name + ' to favorite?',
@@ -78,15 +86,24 @@ function RenderDish(props) {
                     {text: 'OK', onPress: () => {props.favorite ? console.log('Already favorite') : props.onPress()}},
                     ],
                     { cancelable: false }
-                );
-
+            );
+            }
+            else if (recognizeComment(gestureState)){
+                props.toggleModal()
+            }
             return true;
         }
-    })
-    
+        });
+        const handleViewRef = ref => {
+            if(ref){
+                view = ref
+            }
+        }
+
         if (dish != null) {
             return(
-                <Animatable.View animation="fadeInDown" duration={2000} delay={1000}
+                <Animatable.View 
+                animation="fadeInDown" duration={2000} delay={1000}
                 {...panResponder.panHandlers}  ref={handleViewRef}>
                 <Card>
                     <Card.Title>{dish.name}</Card.Title>
@@ -135,7 +152,8 @@ class Dishdetail extends React.Component{
             comment:'',
             rating:5,
             comment_err:false,
-            name_err :false
+            name_err :false,
+            view : null
         };
     }
     markFavorite(dishId) {
