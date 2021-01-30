@@ -1,7 +1,6 @@
 import React from 'react';
 import { FlatList ,Text,ScrollView} from 'react-native';
 import { ListItem , Avatar} from 'react-native-elements';
-import {LEADERS} from '../shared/leaders';
 import { Card } from 'react-native-elements';
 
 import { connect } from 'react-redux';
@@ -32,13 +31,6 @@ function History() {
 
 class About extends React.Component{
 
-
-    // constructor(props) {
-    //     super(props);
-    //     this.state = {
-    //         leaders: LEADERS
-    //     };
-    // }
 
     static navigationOptions = {
         title: 'About Us'

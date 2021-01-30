@@ -1,5 +1,6 @@
 import * as ActionTypes from './ActionTypes';
 import { baseUrl } from '../shared/baseUrl';
+import { add } from 'react-native-reanimated';
 
 export const fetchComments = () => (dispatch) => {
     return fetch('https://run.mocky.io/v3/f5e03405-3b6b-4e8b-aebe-fefc4cb9c801')
@@ -17,7 +18,7 @@ export const fetchComments = () => (dispatch) => {
             throw errmess;
       })
     .then(response => response.json())
-    .then(comments => {dispatch(addComments(comments));console.log('comments',comments)})
+    .then(comments => dispatch(addComments(comments)))
     .catch(error => dispatch(commentsFailed(error.message)));
 };
 
@@ -37,7 +38,6 @@ export const fetchDishes = () => (dispatch) => {
 
     return fetch('https://run.mocky.io/v3/3d3ea152-6d41-4688-964a-18f9af25e64b')
     .then(response => {
-        console.log(response)
         if (response.ok) {
           return response;
         } else {
@@ -51,7 +51,7 @@ export const fetchDishes = () => (dispatch) => {
             throw errmess;
       })
     .then(response => response.json())
-    .then(dishes => {dispatch(addDishes(dishes));console.log('dishes',dishes)})
+    .then(dishes => dispatch(addDishes(dishes)))
     .catch(error => dispatch(dishesFailed(error.message)));
 };
 
@@ -112,7 +112,6 @@ export const fetchLeaders = () => (dispatch) => {
 
     return fetch('https://run.mocky.io/v3/df2d44b8-745d-41bd-bf48-4b83c9ab73e4')
     .then(response => {
-        console.log('have the respones',response);
         if (response.ok) {
             return response;
         } else {
@@ -145,13 +144,27 @@ export const addLeaders = (leaders) => ({
 });
 
 export const postFavorite = (dishId)  => (dispatch) => {
-    // setTimeout(() => {
+    setTimeout(() => {
         dispatch(addFavorite(dishId));
-    // }, 2000);
+    }, 2000);
 };
 
 
 export const addFavorite = (dishId) => ({
     type: ActionTypes.ADD_FAVORITE,
     payload: dishId
+});
+
+export const postComment = (id,dishId,comment,author,rating,date)  => (dispatch) => {
+    setTimeout(() => {
+        dispatch(addComment(id,dishId,comment,author,rating,date));
+    }, 2000);
+};
+
+
+export const addComment = (id,dishId,comment,author,rating,date) => ({
+    type: ActionTypes.ADD_COMMENT,
+    payload: {
+        id,dishId,comment,author,rating,date
+    }
 });

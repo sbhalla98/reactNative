@@ -13,31 +13,23 @@ const mapStateToProps = state => {
   }
 
 class Menu extends React.Component{
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            dishes: DISHES
-        };
-    }
-
+    
     static navigationOptions = {
         title: 'Menu'
     };
 
 
     renderMenuItem = ({item, index}) => {
-        const { navigate } = this.props.navigation;
+        const arr =[require('./images/uthappizza.png'),require('./images/zucchipakoda.png'),require('./images/vadonut.png'),require('./images/elaicheesecake.png')]
         return (
                 <ListItem
                     key={index}
                     title={item.name}
                     subtitle={item.description}
                     hideChevron={true}
-                    //leftAvatar={{ source:{uri: baseUrl + 'images/logo.png'}}}
                     onPress={() => this.props.navigation.navigate('DishDetail', { dishId: item.id })}
                   >
-                      <Avatar source={require('./images/uthappizza.png')} rounded />
+                      <Avatar source={arr[index]} rounded />
                         <ListItem.Content>
                         <ListItem.Title>{item.name}</ListItem.Title>
                         <ListItem.Subtitle>{item.description}</ListItem.Subtitle>
@@ -47,12 +39,12 @@ class Menu extends React.Component{
     };
 
     render(){
-        if (this.props.dishes.isLoading) {
+        if (this.props.dishes.dishes.isLoading) {
             return(
                 <Loading />
             );
         }
-        else if (this.props.dishes.errMess) {
+        else if (this.props.dishes.dishes.errMess) {
             return(
                 <View>            
                     <Text>{props.dishes.errMess}</Text>
