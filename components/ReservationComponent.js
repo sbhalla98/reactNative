@@ -113,21 +113,21 @@ class Reservation extends Component {
             let callendar;
             if(Platform.OS === 'ios'){
                 callendar =await Calendar.getDefaultCalendarAsync() 
-                this.setState({callendarId:callendar[0].id})
+                this.setState({callendarId:callendar.id})
             }else{
                 callendar =await Calendar.getCalendarsAsync();
-                this.setState({callendarId:callendar.id})
+                this.setState({callendarId:callendar[0].id})
             }
         }else{
             callendarPermission = await Calendar.requestCalendarPermissionsAsync();
             this.setState({permissionCallendar:true});
             let callendar;
             if(Platform.OS === 'ios'){
-                callendar =await Calendar.getDefaultCalendarAsync() 
-                this.setState({callendarId:callendar[0].id})
+                callendar =await Calendar.getDefaultCalendarAsync();
+                this.setState({callendarId:callendar.id})
             }else{
                 callendar =await Calendar.getCalendarsAsync();
-                this.setState({callendarId:callendar.id})
+                this.setState({callendarId:callendar[0].id})
             }
         }
         }else{
@@ -240,12 +240,23 @@ class Reservation extends Component {
                 </View>
                 <View style={styles.formRowDate}>
                 <Text style={styles.formLabel}>Date and Time</Text>
-                {Platform.OS === 'ios' && <DateTimePicker
+                {Platform.OS !== 'ios' && <Button
+                    title="choose date"
+                    onPress={()=>this.setState({showdatePicker:true})}
+                ></Button>}
+                {(Platform.OS === 'ios' || this.state.showdatePicker) && <DateTimePicker
                 testID="dateTimePicker"
                 value={this.state.date}
                 mode='datetime'
                 display="default"
-                onChange={(event,date) => { if(date)this.setState({date: date})}}
+                onChange={(event,date) => { 
+                    if(date){
+                        this.setState({date: date})
+                    }
+                    
+                        this.setState({showdatePicker:false})
+                    }
+                }
                 />
                 }
                 </View>
