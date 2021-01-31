@@ -3,7 +3,7 @@ import Menu from './MenuComponent';
 import { DISHES } from '../shared/dishes';
 
 import Dishdetail from './DishDetail';
-import { View ,Platform,StyleSheet,Text,ScrollView} from 'react-native';
+import { View ,Platform,StyleSheet,Text,ScrollView, ToastIOS,Alert} from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -16,6 +16,8 @@ import {
   DrawerItems,
 } from '@react-navigation/drawer';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import NetInfo from "@react-native-community/netinfo";
+import {useNetInfo} from "@react-native-community/netinfo";
 
 import {
   DrawerContentScrollView,
@@ -29,6 +31,7 @@ import { fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/
 
 import Reservation from './ReservationComponent';
 import Favorite from './FavoriteComponent';
+import Login from './LoginComponent';
 
 const mapStateToProps = state => {
   return {
@@ -73,6 +76,7 @@ class MenuNavigator extends Component{
     )
     }
 }
+connect(mapStateToProps, mapDispatchToProps)(MenuNavigator);
 
 const CustomDrawerContentComponent = (props) => (
   <DrawerContentScrollView {...props}>
@@ -91,12 +95,59 @@ const CustomDrawerContentComponent = (props) => (
 );
 
 class Main extends Component {
+  //x = useNetInfo();
+  ConnectIfo = ()=>{
+    //const x = useNetInfo();
+    NetInfo.fetch().then(state => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+      Alert.alert(
+        'NETWORK CONNECTION',
+        ` Connection type: ${state.type} \n Is connected??: ${state.isConnected}`,
+        [],
+        { cancelable: true }
+    );
+      // AlertIOS.alert('Initial Network Connectivity Type: '
+      // + state.type + ', effectiveType: ' + state.isConnected);
+      // ToastAndroid.show('Initial Network Connectivity Type: '
+      //       + state.type + ', effectiveType: ' + state.isConnected,
+      //       ToastAndroid.LONG)
+    });
+
+    NetInfo.addEventListener(state => {
+      console.log('gghjh')
+      this.handleConnectivityChange(state.type);
+    });
+    // /
+  }
+
 
   componentDidMount() {
    this.props.fetchDishes();
     this.props.fetchComments();
     this.props.fetchPromos();
     this.props.fetchLeaders();
+
+    this.ConnectIfo();
+  }
+
+  handleConnectivityChange = (connectionInfo) => {
+    switch (connectionInfo.type) {
+      case 'none':
+        ToastAndroid.show('You are now offline!', ToastAndroid.LONG);
+        break;
+      case 'wifi':
+        ToastAndroid.show('You are now connected to WiFi!', ToastAndroid.LONG);
+        break;
+      case 'cellular':
+        ToastAndroid.show('You are now connected to Cellular!', ToastAndroid.LONG);
+        break;
+      case 'unknown':
+        ToastAndroid.show('You now have unknown connection!', ToastAndroid.LONG);
+        break;
+      default:
+        break;
+    }
   }
   render() {
  
@@ -117,6 +168,7 @@ class Main extends Component {
                   }}
                 drawerContent={props => <CustomDrawerContentComponent {...props} />}
                 >
+                  <Drawer.Screen name="Login" component={Login} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="sign-in" color={headerTintColor}  type='font-awesome'></Icon>)}} />
                 <Drawer.Screen name="Home" component={Home} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="home" color={headerTintColor}  type='font-awesome'></Icon>)}} />
                 <Drawer.Screen name="About Us" component={AboutUs} options={{drawerIcon:({headerTintColor})=>(<Icon size={24} name="info-circle" color={headerTintColor}  type='font-awesome'></Icon>)}}/>
                 <Drawer.Screen name="Menu" component={MenuNavigator} options={{headerShown:false,drawerIcon:({headerTintColor})=>(<Icon size={24} name="list" color={headerTintColor}  type='font-awesome'></Icon>)}} />
@@ -131,7 +183,6 @@ class Main extends Component {
 }
   
 export default connect(mapStateToProps, mapDispatchToProps)(Main);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

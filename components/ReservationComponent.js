@@ -3,6 +3,16 @@ import { Card } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker';
 import { Text, View, StyleSheet, Picker, Switch, Button,ScrollView,Alert } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import * as Notifications from 'expo-notifications';
+
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
 
 class Reservation extends Component {
 
@@ -26,10 +36,72 @@ class Reservation extends Component {
             guests: 1,
             smoking: false,
             date: '',
-            showModal: false
+            showModal: false,
+            expoPushToken :'',
+            notification: false
         });
     }
 
+   schedulePushNotification =async ()=> {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Your Reservation',
+            body: 'Reservation for '+ this.state.date + ' requested',
+            sound: 'notification.wav'
+          },
+          trigger: { seconds: 1 },
+        });
+      }
+    
+      registerForPushNotificationsAsync = async () => {
+        let token;
+        if (Constants.isDevice) {
+          const { status: existingStatus } = await Notifications.getPermissionsAsync();
+          let finalStatus = existingStatus;
+          if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+          }
+          if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+          }
+          token = (await Notifications.getExpoPushTokenAsync()).data;
+          console.log(token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+      
+        if (Platform.OS === 'android') {
+          Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+          });
+        }
+      
+        return token;
+      }
+      notificationListener = React.createRef();
+      responseListener =React.createRef();
+      componentDidMount() {
+          console.log('here');
+        this.registerForPushNotificationsAsync().then(token => this.setState({expoPushToken : token })).catch(err=>console.log('error in push'));
+    
+        this.notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          this.setState({ notification });
+        });
+    
+        this.responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log(response);
+        });
+    }
+
+      componentWillUnmount() {
+        Notifications.removeNotificationSubscription(this.notificationListener);
+        Notifications.removeNotificationSubscription(this.responseListener);
+      }
     handleReservation() {
         Alert.alert(
             'YOUR RESERVATION OK?',
@@ -42,11 +114,40 @@ class Reservation extends Component {
                 },
                 {
                     text: 'OK',
-                    onPress: () => this.resetForm()
+                    onPress: async () => {
+                        await this.schedulePushNotification();
+                        this.resetForm();
+                    }
                 }
             ],
             { cancelable: false }
         );
+    }
+    async obtainNotificationPermission() {
+        let permission = await Permissions.getAsync(Permissions.USER_FACING_NOTIFICATIONS);
+        if (permission.status !== 'granted') {
+            permission = await Permissions.askAsync(Permissions.USER_FACING_NOTIFICATIONS);
+            if (permission.status !== 'granted') {
+                Alert.alert('Permission not granted to show notifications');
+            }
+        }
+        return permission;
+    }
+
+    async presentLocalNotification(date) {
+        await this.obtainNotificationPermission();
+        Notifications.presentLocalNotificationAsync({
+            title: 'Your Reservation',
+            body: 'Reservation for '+ date + ' requested',
+            ios: {
+                sound: true
+            },
+            android: {
+                sound: true,
+                vibrate: true,
+                color: '#512DA8'
+            }
+        });
     }
     
     render() {
