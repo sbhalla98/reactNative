@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Card } from 'react-native-elements';
-import DatePicker from 'react-native-datepicker';
 import { Text, View, StyleSheet, Picker, Switch, Button,ScrollView,Alert,Platform } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import * as Notifications from 'expo-notifications';
 import * as Calendar from 'expo-calendar';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 Notifications.setNotificationHandler({
@@ -23,7 +23,7 @@ class Reservation extends Component {
         this.state = {
             guests: 1,
             smoking: false,
-            date: ''
+            date: new Date()
         }
     }
 
@@ -36,12 +36,13 @@ class Reservation extends Component {
         this.setState({
             guests: 1,
             smoking: false,
-            date: '',
+            date: new Date(),
             showModal: false,
             expoPushToken :'',
             notification: false,
             permissionCallendar:false,
-            callendarId:0
+            callendarId:0,
+            showdatePicker:false
         });
     }
 
@@ -57,14 +58,18 @@ class Reservation extends Component {
       }
 
       addReservationToCalendar = async () => {
-        const date  = new Date(Date.parse(this.state.date));
-        if(this.state.callendarPermission){
+        const date  = Date.parse(this.state.date);
+        if(this.state.permissionCallendar){
         Calendar.createEventAsync(this.state.callendarId,{
             title:'Con Fusion Table Reservation',
             startDate:date,
             endDate:date + 2*60*60*1000,
             location:'121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong',
             timeZone:'Asia/Hong_Kong'
+        }).then((result)=>{
+            console.log('Event added sucessfully',result);
+        }).catch(err=>{
+            console.log('error',err);
         })
         }
       }
@@ -105,13 +110,23 @@ class Reservation extends Component {
         let callendarPermission = await Calendar.requestCalendarPermissionsAsync();
         if (callendarPermission.status === 'granted') {
             this.setState({permissionCallendar:true});
-            let callendar = Platform.OS==='ios' ? await Calendar.getDefaultCalendarAsync() : await Calendar.getCalendarsAsync();
-            this.setState({callendarId:callendar.id})
+            let callendar;
+            if(Platform.OS === 'ios'){
+                callendar =await Calendar.getDefaultCalendarAsync() 
+                this.setState({callendarId:callendar[0].id})
+            }else{
+                callendar =await Calendar.getCalendarsAsync();
+                this.setState({callendarId:callendar.id})
+            }
         }else{
             callendarPermission = await Calendar.requestCalendarPermissionsAsync();
-            if (callendarPermission.status === 'granted') {
-                this.setState({permissionCallendar:true});
-                let callendar =  Platform.OS==='ios' ? await Calendar.getDefaultCalendarAsync() : await Calendar.getCalendarsAsync();
+            this.setState({permissionCallendar:true});
+            let callendar;
+            if(Platform.OS === 'ios'){
+                callendar =await Calendar.getDefaultCalendarAsync() 
+                this.setState({callendarId:callendar[0].id})
+            }else{
+                callendar =await Calendar.getCalendarsAsync();
                 this.setState({callendarId:callendar.id})
             }
         }
@@ -159,6 +174,7 @@ class Reservation extends Component {
                     text: 'OK',
                     onPress: async () => {
                         await this.schedulePushNotification();
+                        await this.obtainCalendarPermission();
                         await this.addReservationToCalendar();
                         this.resetForm();
                     }
@@ -222,31 +238,16 @@ class Reservation extends Component {
                     onValueChange={(value) => this.setState({smoking: value})}>
                 </Switch>
                 </View>
-                <View style={styles.formRow}>
+                <View style={styles.formRowDate}>
                 <Text style={styles.formLabel}>Date and Time</Text>
-                <DatePicker
-                    style={{flex: 2, marginRight: 20}}
-                    date={this.state.date}
-                    format=''
-                    mode="datetime"
-                    placeholder="select date and Time"
-                    minDate="2017-01-01"
-                    confirmBtnText="Confirm"
-                    cancelBtnText="Cancel"
-                    customStyles={{
-                    dateIcon: {
-                        position: 'absolute',
-                        left: 0,
-                        top: 4,
-                        marginLeft: 0
-                    },
-                    dateInput: {
-                        marginLeft: 36
-                    }
-                    }}
-                    display="default"
-                    onChange={(date) => {this.setState({date: date})}}
+                {Platform.OS === 'ios' && <DateTimePicker
+                testID="dateTimePicker"
+                value={this.state.date}
+                mode='datetime'
+                display="default"
+                onChange={(event,date) => { if(date)this.setState({date: date})}}
                 />
+                }
                 </View>
                 <View style={styles.formRow}>
                 <Button
@@ -271,6 +272,9 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
       margin: 20
+    },
+    formRowDate: {
+        margin: 20
     },
     formLabel: {
         fontSize: 18,
