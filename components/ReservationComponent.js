@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Card } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker';
-import { Text, View, StyleSheet, Picker, Switch, Button,ScrollView,Alert } from 'react-native';
+import { Text, View, StyleSheet, Picker, Switch, Button,ScrollView,Alert,Platform } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import * as Notifications from 'expo-notifications';
+import * as Calendar from 'expo-calendar';
 
 
 Notifications.setNotificationHandler({
@@ -38,7 +39,9 @@ class Reservation extends Component {
             date: '',
             showModal: false,
             expoPushToken :'',
-            notification: false
+            notification: false,
+            permissionCallendar:false,
+            callendarId:0
         });
     }
 
@@ -52,6 +55,20 @@ class Reservation extends Component {
           trigger: { seconds: 1 },
         });
       }
+
+      addReservationToCalendar = async () => {
+        const date  = new Date(Date.parse(this.state.date));
+        if(this.state.callendarPermission){
+        Calendar.createEventAsync(this.state.callendarId,{
+            title:'Con Fusion Table Reservation',
+            startDate:date,
+            endDate:date + 2*60*60*1000,
+            location:'121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong',
+            timeZone:'Asia/Hong_Kong'
+        })
+        }
+      }
+
     
       registerForPushNotificationsAsync = async () => {
         let token;
@@ -67,7 +84,6 @@ class Reservation extends Component {
             return;
           }
           token = (await Notifications.getExpoPushTokenAsync()).data;
-          console.log(token);
         } else {
           alert('Must use physical device for Push Notifications');
         }
@@ -83,11 +99,38 @@ class Reservation extends Component {
       
         return token;
       }
+
+      obtainCalendarPermission = async () =>{
+        if(Calendar.isAvailableAsync){
+        let callendarPermission = await Calendar.requestCalendarPermissionsAsync();
+        if (callendarPermission.status === 'granted') {
+            this.setState({permissionCallendar:true});
+            let callendar = Platform.OS==='ios' ? await Calendar.getDefaultCalendarAsync() : await Calendar.getCalendarsAsync();
+            this.setState({callendarId:callendar.id})
+        }else{
+            callendarPermission = await Calendar.requestCalendarPermissionsAsync();
+            if (callendarPermission.status === 'granted') {
+                this.setState({permissionCallendar:true});
+                let callendar =  Platform.OS==='ios' ? await Calendar.getDefaultCalendarAsync() : await Calendar.getCalendarsAsync();
+                this.setState({callendarId:callendar.id})
+            }
+        }
+        }else{
+            Alert.alert(
+                'your device doesnt support this feature !!!',
+                ``,
+                [],
+                { cancelable: true }
+            );
+        }
+      }
+
+
       notificationListener = React.createRef();
       responseListener =React.createRef();
       componentDidMount() {
-          console.log('here');
-        this.registerForPushNotificationsAsync().then(token => this.setState({expoPushToken : token })).catch(err=>console.log('error in push'));
+        this.obtainCalendarPermission();
+        this.registerForPushNotificationsAsync().then(token => this.setState({expoPushToken : token })).catch(err=>console.log('error in pushing notification'));
     
         this.notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
           this.setState({ notification });
@@ -116,6 +159,7 @@ class Reservation extends Component {
                     text: 'OK',
                     onPress: async () => {
                         await this.schedulePushNotification();
+                        await this.addReservationToCalendar();
                         this.resetForm();
                     }
                 }
@@ -200,7 +244,8 @@ class Reservation extends Component {
                         marginLeft: 36
                     }
                     }}
-                    onDateChange={(date) => {this.setState({date: date})}}
+                    display="default"
+                    onChange={(date) => {this.setState({date: date})}}
                 />
                 </View>
                 <View style={styles.formRow}>
